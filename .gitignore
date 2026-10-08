@@ -1,0 +1,27 @@
+# Build artifacts & binaries
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.ninja
+*.exe
+*.obj
+*.o
+
+# Runtime high-score data
+*.dat
+
+# Reference materials, tools, and unused assets
+assets/
+specs_ref/
+sprites_ref/
+tools/
+*.png
+src/SpriteData.h
+
+# IDE / Editor folders
+.vs/
+.vscode/
+.idea/
