@@ -23,3 +23,7 @@ add_executable(thrust WIN32
 
 target_include_directories(thrust PRIVATE src)
 target_link_libraries(thrust PRIVATE raylib)
+
+if(MINGW)
+    target_link_options(thrust PRIVATE -static -static-libgcc -static-libstdc++)
+endif()
