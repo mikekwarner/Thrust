@@ -19,6 +19,7 @@ add_executable(thrust WIN32
     src/Physics.cpp
     src/Renderer.cpp
     src/Audio.cpp
+    src/thrust.rc
 )
 
 target_include_directories(thrust PRIVATE src)

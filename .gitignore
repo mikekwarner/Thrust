@@ -19,6 +19,7 @@ specs_ref/
 sprites_ref/
 tools/
 *.png
+generate_icon.py
 src/SpriteData.h
 
 # IDE / Editor folders

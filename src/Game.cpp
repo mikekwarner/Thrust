@@ -161,6 +161,8 @@ void Game::LoadLevel(int levelIdx, bool isRespawn) {
   }
 
   powerPlant = {def.powerPlant.x, def.powerPlant.y, true, 0, 50, -1, 32, 1.0f};
+  preCountdownSpawnIdx = -1;
+  preCountdownPodAttached = false;
 
   fuelTanks.clear();
   for (const auto &f : def.fuel) {
@@ -217,7 +219,31 @@ void Game::CheckpointRespawn() {
   float curY = physics.state.y;
   size_t bestIdx = 0;
 
-  if (physics.state.podAttached) {
+  if (powerPlant.countdownTimer >= 0) {
+    // If killed by planet explosion / countdown expiration (or during countdown),
+    // respawn at the checkpoint prior to the destruction of the power plant,
+    // and restore the power plant to its intact state prior to destruction.
+    if (preCountdownSpawnIdx >= 0 &&
+        preCountdownSpawnIdx < static_cast<int>(def.spawnPoints.size())) {
+      bestIdx = static_cast<size_t>(preCountdownSpawnIdx);
+      physics.state.podAttached = preCountdownPodAttached;
+    } else {
+      // Fallback: spawn point immediately prior to power plant
+      bestIdx = 0;
+      for (size_t i = 0; i < def.spawnPoints.size(); ++i) {
+        if (def.spawnPoints[i].midpointY <= def.powerPlant.y) {
+          bestIdx = i;
+        }
+      }
+    }
+    powerPlant.alive = true;
+    powerPlant.countdownTimer = -1;
+    powerPlant.countdownSecTimer = 1.0f;
+    powerPlant.countdownTicks = 32;
+    powerPlant.rechargeCounter = 0;
+    powerPlant.rechargeIncrease = 50;
+    preCountdownSpawnIdx = -1;
+  } else if (physics.state.podAttached) {
     // When carrying a pod, respawn at the lower spawn point rather than the
     // higher spawn point
     bestIdx = def.spawnPoints.size() - 1;
@@ -1493,6 +1519,25 @@ void Game::CheckCollisions(float dt) {
           powerPlant.countdownSecTimer = 1.0f;
           powerPlant.rechargeCounter = 255;
           Audio::PlayCountdownBeep();
+
+          // Record spawn point and pod state prior to destruction of the power plant
+          preCountdownPodAttached = physics.state.podAttached;
+          if (physics.state.podAttached) {
+            preCountdownSpawnIdx = static_cast<int>(def.spawnPoints.size() - 1);
+            for (size_t i = 0; i < def.spawnPoints.size(); ++i) {
+              if (def.spawnPoints[i].midpointY + 18.0f >= physics.state.y) {
+                preCountdownSpawnIdx = static_cast<int>(i);
+                break;
+              }
+            }
+          } else {
+            preCountdownSpawnIdx = 0;
+            for (size_t i = 0; i < def.spawnPoints.size(); ++i) {
+              if (def.spawnPoints[i].midpointY <= physics.state.y) {
+                preCountdownSpawnIdx = static_cast<int>(i);
+              }
+            }
+          }
         }
       } else {
         powerPlant.rechargeCounter = newRecharge;

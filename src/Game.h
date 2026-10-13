@@ -88,6 +88,10 @@ private:
     int pendingBonus = 0;
     bool teleportSoundPlayed = false;
 
+    // Checkpoint prior to power plant destruction
+    int preCountdownSpawnIdx = -1;
+    bool preCountdownPodAttached = false;
+
     void LoadLevel(int levelIdx, bool isRespawn = false);
     void BeginRespawnSequence(const std::string& popupText);
     void CheckpointRespawn();
