@@ -74,6 +74,7 @@ struct LevelDef {
     std::vector<Point> fuel;
     std::vector<SwitchDef> switches;
     DoorDef door;
+    int countdownSeconds;
 };
 
 inline const std::vector<LevelDef>& GetLevels() {
@@ -117,6 +118,7 @@ inline const std::vector<LevelDef>& GetLevels() {
             {
             },
             {DoorType::NONE, 0, 0, 0, 0, 0, 0},
+            10,
         },
         {
             "Level 1",
@@ -165,6 +167,7 @@ inline const std::vector<LevelDef>& GetLevels() {
             {
             },
             {DoorType::NONE, 0, 0, 0, 0, 0, 0},
+            10,
         },
         {
             "Level 2",
@@ -233,6 +236,7 @@ inline const std::vector<LevelDef>& GetLevels() {
             {
             },
             {DoorType::NONE, 0, 0, 0, 0, 0, 0},
+            10,
         },
         {
             "Level 3",
@@ -302,6 +306,7 @@ inline const std::vector<LevelDef>& GetLevels() {
                 {172.0f, 647.0f, SwitchDir::LEFT},
             },
             {DoorType::SLIDE, 617, 16, 13, 174, 158, 156},
+            15,
         },
         {
             "Level 4",
@@ -398,6 +403,7 @@ inline const std::vector<LevelDef>& GetLevels() {
                 {152.0f, 885.0f, SwitchDir::RIGHT},
             },
             {DoorType::STEP, 835, 21, 21, 166, 152, 152},
+            10,
         },
         {
             "Level 5",
@@ -492,6 +498,7 @@ inline const std::vector<LevelDef>& GetLevels() {
                 {190.0f, 861.0f, SwitchDir::LEFT},
             },
             {DoorType::CHEVRON, 880, 18, 15, 192, 174, 174},
+            60,
         },
     };
     return levels;

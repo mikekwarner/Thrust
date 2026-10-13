@@ -1519,7 +1519,7 @@ void Game::CheckCollisions(float dt) {
 
       if (newRecharge > 255) {
         if (powerPlant.countdownTimer < 0) {
-          powerPlant.countdownTimer = (currentLevelIndex == 5) ? 60 : 10;
+          powerPlant.countdownTimer = def.countdownSeconds;
           powerPlant.countdownTicks = 32;
           powerPlant.countdownSecTimer = 1.0f;
           powerPlant.rechargeCounter = 255;
