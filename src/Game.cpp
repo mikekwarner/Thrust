@@ -674,38 +674,43 @@ void Game::UpdatePlaying(float dt, const ThrustInput &input) {
   // rate)
   if (input.thrust && fuel > 0 && tick60Steps > 0) {
     int angleIdx = physics.state.angle & 0x1F;
-    float dirX = Constants::ANGLE_X[angleIdx];
-    float dirY = Constants::ANGLE_Y[angleIdx];
-    int perpIdx = (angleIdx + 8) & 0x1F;
-    float perpX = Constants::ANGLE_X[perpIdx];
-    float perpY = Constants::ANGLE_Y[perpIdx];
+    float theta = (static_cast<float>(angleIdx) / 32.0f) * 2.0f * PI;
+    float cosA = std::cos(theta);
+    float sinA = std::sin(theta);
 
-    // Emit from the nozzle exit in logical screen space (5.8 logical px behind
-    // ship center), scaled by WORLD_SCALE_X (4.0) and WORLD_SCALE_Y (2.0) so
-    // exhaust aligns at all 32 angles
+    // In ship local space (matching Renderer.cpp DrawVectorShip), the engine nozzle
+    // exit is at (0, +4.6 logical px).
+    // blast direction (away from nozzle): blastX = -sinA, blastY = +cosA
+    // perpendicular direction (across nozzle opening): perpX = cosA, perpY = sinA
+    float blastX = -sinA;
+    float blastY = cosA;
+    float perpX = cosA;
+    float perpY = sinA;
+
+    float nozzleLogX = -4.6f * sinA;
+    float nozzleLogY = 4.6f * cosA;
+
     for (int i = 0; i < 3; ++i) {
-      float lateralLog = ((std::rand() % 100) - 50) /
-                         42.0f; // [-1.2, +1.2] logical px across nozzle
-      float spreadVelLog = ((std::rand() % 100) - 50) / 85.0f;
-      float jetSpeedLog =
-          2.0f + (std::rand() % 180) / 100.0f; // [2.0, 3.8] logical px/tick
+      float lateralLog = ((std::rand() % 100) - 50) / 35.0f; // [-1.4, +1.4] logical px across nozzle
+      float spreadVelLog = ((std::rand() % 100) - 50) / 70.0f; // lateral spread
+      float jetSpeedLog = 2.2f + (std::rand() % 160) / 100.0f; // [2.2, 3.8] logical px/frame
 
-      float spawnLogX = -dirX * 5.8f + perpX * lateralLog;
-      float spawnLogY = -dirY * 5.8f + perpY * lateralLog;
-      float velLogX = -dirX * jetSpeedLog + perpX * spreadVelLog;
-      float velLogY = -dirY * jetSpeedLog + perpY * spreadVelLog;
+      float spawnLogX = nozzleLogX + perpX * lateralLog;
+      float spawnLogY = nozzleLogY + perpY * lateralLog;
+      float velLogX = blastX * jetSpeedLog + perpX * spreadVelLog;
+      float velLogY = blastY * jetSpeedLog + perpY * spreadVelLog;
 
       Entities::Particle p;
       p.x = physics.state.shipX + spawnLogX / Constants::WORLD_SCALE_X;
       p.y = physics.state.shipY + spawnLogY / Constants::WORLD_SCALE_Y;
-      p.vx = physics.state.vx + velLogX / Constants::WORLD_SCALE_X;
-      p.vy = physics.state.vy + velLogY / Constants::WORLD_SCALE_Y;
+      p.vx = velLogX / Constants::WORLD_SCALE_X;
+      p.vy = velLogY / Constants::WORLD_SCALE_Y;
       p.maxLifetime = static_cast<float>(6 + (std::rand() % 8));
       p.lifetime = p.maxLifetime;
 
       if (i == 0) {
         // High-velocity vector exhaust streak aligned with jet direction
-        p.length = 2.2f + (std::rand() % 18) / 10.0f;
+        p.length = 2.4f + (std::rand() % 16) / 10.0f;
         p.angle = std::atan2(velLogY, velLogX);
         p.spin = 0.0f;
         p.color = ((std::rand() % 3) == 0) ? WHITE : YELLOW;
